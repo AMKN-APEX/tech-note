@@ -3,3 +3,4 @@ work/
 __pycache__/
 .superpowers/
 node_modules/
+web/data
