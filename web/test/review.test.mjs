@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
-  cardsFromDay, loadState, saveState, enroll, dueCards, grade, exportState, importState, KEY,
+  cardsFromDay, normalize, loadState, saveState, enroll, dueCards, grade, exportState, importState, KEY,
 } from "../review.js";
 
 const memStorage = (init = {}) => {
@@ -22,8 +22,8 @@ const now = new Date("2026-11-25T07:00:00+09:00");
 
 test("cardsFromDay makes term and topic cards", () => {
   const cards = cardsFromDay(day);
-  assert.deepEqual(cards.map((c) => c.id), ["term:焼却炉", "topic:2026-11-25-1", "topic:2026-11-25-2"]);
-  assert.equal(cards[1].front, "問い1");
+  assert.deepEqual(cards.map((c) => c.id), ["topic:2026-11-25-1", "topic:2026-11-25-2", "term:焼却炉"]);
+  assert.equal(cards[0].front, "問い1");
 });
 
 test("loadState returns empty on corrupt json", () => {
@@ -37,11 +37,29 @@ test("loadState returns empty on throwing storage, saveState swallows", () => {
 
 test("enroll then dueCards returns new cards up to limit 5", () => {
   const many = { ...day, new_terms: Array.from({ length: 6 }, (_, i) => ({ name: `t${i}`, definition: "d", field: "" })) };
-  let s = enroll({ version: 1, cards: {} }, cardsFromDay(many), now);
+  let s = enroll({ version: 1, cards: {} }, cardsFromDay(many), now, 100);
   assert.equal(Object.keys(s.cards).length, 8);
   assert.equal(dueCards(s, now).length, 5);
-  s = enroll(s, cardsFromDay(many), now); // re-enroll keeps existing
+  s = enroll(s, cardsFromDay(many), now, 100); // re-enroll keeps existing
   assert.equal(Object.keys(s.cards).length, 8);
+});
+
+test("enroll introduces at most maxNew cards per day", () => {
+  const many = { ...day, new_terms: Array.from({ length: 6 }, (_, i) => ({ name: `t${i}`, definition: "d", field: "" })) };
+  let s = enroll({ version: 1, cards: {} }, cardsFromDay(many), now, 4);
+  assert.equal(Object.keys(s.cards).length, 4);
+  s = enroll(s, cardsFromDay(many), new Date(now.getTime() + 3600e3), 4);
+  assert.equal(Object.keys(s.cards).length, 4);
+  s = enroll(s, cardsFromDay(many), new Date(now.getTime() + 86400e3), 4);
+  assert.equal(Object.keys(s.cards).length, 8);
+});
+
+test("term variants share one card id", () => {
+  assert.equal(normalize(" ＰＶＣ（塩ビ） "), normalize("pvc(塩 ビ)"));
+  const a = cardsFromDay({ new_terms: [{ name: "ＰＶＣ（塩ビ）", definition: "d" }], topics: [] });
+  const b = cardsFromDay({ new_terms: [{ name: "pvc(塩ビ)", definition: "d" }], topics: [] });
+  assert.equal(a[0].id, b[0].id);
+  assert.equal(a[0].front, "ＰＶＣ（塩ビ）");
 });
 
 test("grade Good pushes due into future", () => {

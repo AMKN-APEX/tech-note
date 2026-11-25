@@ -21,7 +21,8 @@
 5. `work/day.json` を下のスキーマで書く
 6. 検証と保存：`uv run python -m generator commit-day work/day.json --data data`
    - 失敗したらエラーを読んで `work/day.json` を直し、再実行する（最大3回）
-7. `git add data && git commit -m "content: <今日>" && git push`
+   - 3回とも失敗したら、何もコミットせずにエラー内容を報告して終了する
+7. `git add data && git commit -m "content: <今日>" && git pull --rebase && git push origin HEAD:main`
 
 ## スキーマ（`work/day.json`）
 
@@ -53,7 +54,7 @@
 - **summary**：ちょうど3行。1行40〜60字程度
 - **mechanism**：前提知識ゼロでも追える因果の説明。「AだからB、BだからC」の形で、200〜350字
 - **terms**：その話題を理解するための前提となる基礎用語を3〜5個
-- **new_terms**：terms のうち既習用語にないものだけ。definition は中学生にもわかる1〜2文。専門用語で定義しない
+- **new_terms**：terms のうち既習用語にないものだけ。**1日合計で最大3個**（復習の量を1日10分に収めるため）。それより多い場合は、理解に一番必要なものを選ぶ。definition は中学生にもわかる1〜2文。専門用語で定義しない
 - **connections**：既習用語か過去の話題IDへのつながりを1〜2個。分野をまたぐつながり（機械↔化学、AI↔化学など）を優先する。本当につながるものがなければ空配列でよい
 - **hook**：会話でそのまま話せる一言。「〜らしいよ」「実は〜」の口語で
 - **id**：`<今日>-1` と `<今日>-2`

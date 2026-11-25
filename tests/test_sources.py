@@ -31,3 +31,18 @@ def test_dedup_by_url():
 def test_per_feed_limit():
     cands, _ = fetch_candidates([GOOD], per_feed=2)
     assert len(cands) == 2
+
+
+def test_hanging_feed_times_out(monkeypatch):
+    import generator.sources as src
+
+    calls = {}
+
+    def fake_urlopen(url, timeout=None):
+        calls["timeout"] = timeout
+        raise TimeoutError("timed out")
+
+    monkeypatch.setattr(src.urllib.request, "urlopen", fake_urlopen)
+    cands, failed = fetch_candidates([("slow", "https://example.com/rss")])
+    assert cands == [] and failed == ["slow"]
+    assert calls["timeout"] == src.TIMEOUT_SEC

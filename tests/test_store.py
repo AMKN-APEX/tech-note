@@ -56,3 +56,25 @@ def test_index_sorted_desc(tmp_path, make_day):
 def test_unknown_term_in_topic_is_ignored(tmp_path, make_day):
     commit_day(DayFile.model_validate(make_day(new_terms=[], terms=("未登録",))), tmp_path)
     assert load_terms(tmp_path) == {}
+
+
+def test_inner_whitespace_normalized():
+    assert normalize_term("ダイ ボンディング") == normalize_term("ダイボンディング")
+
+
+def test_variant_new_terms_dropped_from_day_file(tmp_path, make_day):
+    d1 = make_day(new_terms=[{"name": "PVC（塩ビ）", "definition": "d", "field": "化学"}], terms=())
+    d2 = make_day(
+        date="2026-11-26",
+        new_terms=[
+            {"name": "PVC(塩ビ)", "definition": "d", "field": "化学"},
+            {"name": "新語", "definition": "d", "field": "x"},
+            {"name": "新 語", "definition": "d", "field": "x"},
+        ],
+        terms=(),
+    )
+    commit_day(DayFile.model_validate(d1), tmp_path)
+    commit_day(DayFile.model_validate(d2), tmp_path)
+    written = read(tmp_path / "days" / "2026-11-26.json")
+    assert [t["name"] for t in written["new_terms"]] == ["新語"]
+    assert len(load_terms(tmp_path)) == 2

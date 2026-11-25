@@ -2,6 +2,7 @@
 
 import html
 import re
+import urllib.request
 from dataclasses import asdict, dataclass
 
 import feedparser
@@ -20,6 +21,7 @@ FEEDS: list[tuple[str, str]] = [
 ]
 
 SUMMARY_MAX = 300
+TIMEOUT_SEC = 15
 _TAG = re.compile(r"<[^>]+>")
 
 
@@ -49,7 +51,9 @@ def fetch_candidates(
     seen: set[str] = set()
     for name, url in feeds:
         try:
-            parsed = feedparser.parse(url, agent="tech-trivia/0.1")
+            req = urllib.request.Request(url, headers={"User-Agent": "tech-trivia/0.1"})
+            with urllib.request.urlopen(req, timeout=TIMEOUT_SEC) as res:
+                parsed = feedparser.parse(res.read())
         except Exception:
             failed.append(name)
             continue

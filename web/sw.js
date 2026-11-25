@@ -1,16 +1,16 @@
-// App shell: cache first. Data: network first, cache fallback for offline commutes.
-const SHELL = "shell-v1";
-const DATA = "data-v1";
+// Network first so deploys reach the phone immediately; cache is only the
+// offline fallback (e.g. no signal on the commute).
+const CACHE = "app-v2";
 const SHELL_FILES = ["./", "index.html", "style.css", "app.js", "review.js", "vendor/ts-fsrs.mjs", "manifest.json", "icon.svg"];
 
 self.addEventListener("install", (e) => {
-  e.waitUntil(caches.open(SHELL).then((c) => c.addAll(SHELL_FILES)).then(() => self.skipWaiting()));
+  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL_FILES)).then(() => self.skipWaiting()));
 });
 
 self.addEventListener("activate", (e) => {
   e.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== SHELL && k !== DATA).map((k) => caches.delete(k))))
+      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
       .then(() => self.clients.claim()),
   );
 });
@@ -18,17 +18,15 @@ self.addEventListener("activate", (e) => {
 self.addEventListener("fetch", (e) => {
   const url = new URL(e.request.url);
   if (e.request.method !== "GET" || url.origin !== location.origin) return;
-  if (url.pathname.includes("/data/")) {
-    e.respondWith(
-      fetch(e.request)
-        .then((res) => {
+  e.respondWith(
+    fetch(e.request, { cache: "no-cache" })
+      .then((res) => {
+        if (res.ok) {
           const copy = res.clone();
-          caches.open(DATA).then((c) => c.put(e.request, copy));
-          return res;
-        })
-        .catch(() => caches.match(e.request)),
-    );
-  } else {
-    e.respondWith(caches.match(e.request).then((hit) => hit || fetch(e.request)));
-  }
+          caches.open(CACHE).then((c) => c.put(e.request, copy));
+        }
+        return res;
+      })
+      .catch(() => caches.match(e.request)),
+  );
 });

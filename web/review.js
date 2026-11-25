@@ -5,15 +5,18 @@ export const KEY = "tech-trivia-review-v1";
 const scheduler = fsrs();
 const empty = () => ({ version: 1, cards: {} });
 
+// Must match normalize_term() in generator/store.py.
+export const normalize = (s) => s.normalize("NFKC").replace(/\s+/g, "").toLowerCase();
+
 export function cardsFromDay(day) {
   const terms = (day.new_terms || []).map((t) => ({
-    id: `term:${t.name}`, kind: "term", front: t.name, back: t.definition,
+    id: `term:${normalize(t.name)}`, kind: "term", front: t.name, back: t.definition,
   }));
   const topics = (day.topics || []).map((t) => ({
     id: `topic:${t.id}`, kind: "topic", front: t.question,
     back: [...t.summary, "", t.mechanism].join("\n"),
   }));
-  return [...terms, ...topics];
+  return [...topics, ...terms];
 }
 
 function isState(s) {
@@ -37,10 +40,19 @@ export function saveState(storage, state) {
   }
 }
 
-export function enroll(state, cards, now) {
-  const next = { ...state, cards: { ...state.cards } };
+const localDate = (d) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
+// Introduce at most maxNew unseen cards per local day so the review load stays
+// within the daily budget; the rest are picked up on later days.
+export function enroll(state, cards, now, maxNew = 5) {
+  const today = localDate(now);
+  const next = { ...state, cards: { ...state.cards }, newByDay: { [today]: state.newByDay?.[today] ?? 0 } };
   for (const c of cards) {
-    if (!next.cards[c.id]) next.cards[c.id] = JSON.parse(JSON.stringify(createEmptyCard(now)));
+    if (next.cards[c.id]) continue;
+    if (next.newByDay[today] >= maxNew) break;
+    next.cards[c.id] = JSON.parse(JSON.stringify(createEmptyCard(now)));
+    next.newByDay[today] += 1;
   }
   return next;
 }

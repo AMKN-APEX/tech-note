@@ -2,6 +2,7 @@
 
 import json
 import os
+import re
 import tempfile
 import unicodedata
 from pathlib import Path
@@ -10,7 +11,8 @@ from generator.schema import DayFile, TermEntry
 
 
 def normalize_term(name: str) -> str:
-    return unicodedata.normalize("NFKC", name).strip().casefold()
+    """Dictionary key. Must match normalize() in web/review.js."""
+    return re.sub(r"\s+", "", unicodedata.normalize("NFKC", name)).lower()
 
 
 def _read_json(path: Path, default):
@@ -54,15 +56,25 @@ def commit_day(day: DayFile, data_dir: Path) -> None:
     data_dir = Path(data_dir)
     terms = load_terms(data_dir)
 
+    # A term is "new" only the first time its normalized key appears; variants
+    # are dropped from the day file so the app never shows them as new again.
+    fresh = []
     for card in day.new_terms:
         key = normalize_term(card.name)
-        if key not in terms:
-            terms[key] = TermEntry(
-                name=card.name.strip(),
-                definition=card.definition,
-                field=card.field,
-                first_seen=day.date,
-            )
+        existing = terms.get(key)
+        if existing is not None and existing.first_seen != day.date:
+            continue
+        if any(normalize_term(c.name) == key for c in fresh):
+            continue
+        fresh.append(card)
+        terms[key] = TermEntry(
+            name=card.name.strip(),
+            definition=card.definition,
+            field=card.field,
+            first_seen=day.date,
+            related_topics=existing.related_topics if existing else [],
+        )
+    day = day.model_copy(update={"new_terms": fresh})
     for topic in day.topics:
         for name in topic.terms:
             entry = terms.get(normalize_term(name))

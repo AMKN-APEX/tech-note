@@ -1,8 +1,8 @@
 import {
-  cardsFromDay, loadState, saveState, enroll, dueCards, grade, exportState, importState,
+  cardsFromDay, normalize, loadState, saveState, enroll, dueCards, grade, exportState, importState,
 } from "./review.js";
 
-const ENROLL_DAYS = 7;
+const ENROLL_DAYS = 30;
 const REVIEW_LIMIT = 5;
 const $ = (sel, root = document) => root.querySelector(sel);
 
@@ -17,7 +17,6 @@ const storage = (() => {
   }
 })();
 
-const normalize = (s) => s.normalize("NFKC").trim().toLowerCase();
 const dayCache = new Map();
 let terms = {};
 let state = loadState(storage);
@@ -120,7 +119,7 @@ function renderToday(day) {
 async function cardContent(id) {
   if (id.startsWith("term:")) {
     const entry = lookupTerm(id.slice(5));
-    return { label: "基礎用語", front: id.slice(5), back: entry ? entry.definition : "（辞書に未登録）" };
+    return { label: "基礎用語", front: entry ? entry.name : id.slice(5), back: entry ? entry.definition : "（辞書に未登録）" };
   }
   const topicId = id.slice(6);
   const date = topicId.slice(0, 10);
