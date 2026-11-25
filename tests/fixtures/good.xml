@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"><channel><title>Good</title>
+<item><title>記事1</title><link>https://example.com/1</link><description>&lt;p&gt;本文1&lt;/p&gt;</description><pubDate>Tue, 25 Nov 2026 00:00:00 +0000</pubDate></item>
+<item><title>記事2</title><link>https://example.com/2</link><description>本文2</description></item>
+<item><title>記事3</title><link>https://example.com/3</link><description>本文3</description></item>
+</channel></rss>
