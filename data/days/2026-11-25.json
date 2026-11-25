@@ -63,7 +63,31 @@
       "connections": [],
       "hook": "手帳の表紙の合成皮革に、工場の煙突から出たCO2が「石」になって混ざってるらしいよ。",
       "source_url": "https://monoist.itmedia.co.jp/mn/articles/2611/25/news023.html",
-      "source_title": "MONOist：CO2固定の合成炭酸カルシウムでPVC材料 レザー製品化"
+      "source_title": "MONOist：CO2固定の合成炭酸カルシウムでPVC材料 レザー製品化",
+      "flow": [
+        {
+          "label": "排ガスのCO2",
+          "detail": "ボイラーなどの燃焼設備から出る"
+        },
+        {
+          "label": "コンクリートスラッジのカルシウム",
+          "detail": "電柱や杭を作る工場の廃棄物から回収"
+        },
+        {
+          "label": "炭酸カルシウム（カルカーボ）",
+          "detail": "CO2とカルシウムが結びついた安定な固体"
+        },
+        {
+          "label": "PVCに混ぜる",
+          "detail": "石灰石の代わりのフィラーとして配合"
+        },
+        {
+          "label": "手帳・文具のPVCレザー",
+          "detail": "CO2を固体のまま製品に閉じ込める"
+        }
+      ],
+      "video_query": "炭酸カルシウム CO2 固定 カーボンリサイクル",
+      "image_url": "https://image.itmedia.co.jp/mn/articles/2611/25/cover_news023.jpg"
     },
     {
       "id": "2026-11-25-2",
@@ -85,7 +109,27 @@
       "connections": [],
       "hook": "最新の半導体チップは髪の毛より薄くて、もう人の手では持てないから、専用の機械が自動で置いてるらしいよ。",
       "source_url": "https://monoist.itmedia.co.jp/mn/articles/2611/25/news010.html",
-      "source_title": "MONOist：半導体後工程の基礎工事「ダイボンディング」"
+      "source_title": "MONOist：半導体後工程の基礎工事「ダイボンディング」",
+      "flow": [
+        {
+          "label": "ダイシング",
+          "detail": "ウェハを切ってチップに分ける"
+        },
+        {
+          "label": "ダイボンディング",
+          "detail": "ダイボンダーがチップを決まった位置に固定"
+        },
+        {
+          "label": "ワイヤボンディング",
+          "detail": "チップの電極と外部の端子を細い線でつなぐ"
+        },
+        {
+          "label": "製品の品質",
+          "detail": "置く位置や傾きがずれると、配線や性能に響く"
+        }
+      ],
+      "video_query": "ダイボンダー 半導体 動作",
+      "image_url": "https://image.itmedia.co.jp/mn/articles/2611/25/cover_news010.jpg"
     }
   ]
 }

@@ -1,5 +1,5 @@
 import {
-  cardsFromDay, normalize, loadState, saveState, enroll, dueCards, grade, exportState, importState,
+  cardsFromDay, normalize, loadState, saveState, enroll, dueCards, grade, exportState, importState, videoSearchUrl,
 } from "./review.js";
 
 const ENROLL_DAYS = 30;
@@ -50,6 +50,12 @@ function renderTopic(topic, date) {
   $(".field", el).textContent = topic.field;
   $(".title", el).textContent = topic.title;
   $(".question", el).textContent = topic.question;
+  const photo = $(".photo", el);
+  if (topic.image_url && /^https?:\/\//.test(topic.image_url)) {
+    photo.addEventListener("load", () => { photo.hidden = false; });
+    photo.addEventListener("error", () => { photo.remove(); });
+    photo.src = topic.image_url;
+  }
   const summary = $(".summary", el);
   for (const line of topic.summary) {
     const li = document.createElement("li");
@@ -57,6 +63,20 @@ function renderTopic(topic, date) {
     summary.append(li);
   }
   $(".mechanism", el).textContent = topic.mechanism;
+  const flow = $(".flow", el);
+  for (const step of topic.flow || []) {
+    const li = document.createElement("li");
+    const label = document.createElement("span");
+    label.className = "step-label";
+    label.textContent = step.label;
+    const detail = document.createElement("span");
+    detail.className = "step-detail";
+    detail.textContent = step.detail;
+    li.append(label, detail);
+    flow.append(li);
+  }
+  flow.hidden = !flow.children.length;
+  $(".video", el).href = videoSearchUrl(topic);
 
   const termBox = $(".terms", el);
   const defBox = $(".term-def", el);

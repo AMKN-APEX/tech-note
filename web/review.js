@@ -80,3 +80,7 @@ export function importState(text) {
   if (!isState(s)) throw new Error("復習データの形式が正しくありません");
   return s;
 }
+
+export function videoSearchUrl(topic) {
+  return `https://www.youtube.com/results?search_query=${encodeURIComponent(topic.video_query || topic.title)}`;
+}

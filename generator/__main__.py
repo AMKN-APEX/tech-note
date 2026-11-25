@@ -5,8 +5,9 @@ import json
 import sys
 from pathlib import Path
 
-from pydantic import ValidationError
+from pydantic import HttpUrl, ValidationError
 
+from generator.media import fetch_og_image
 from generator.schema import DayFile
 from generator.sources import FEEDS, fetch_candidates
 from generator.store import commit_day, known_term_names
@@ -41,6 +42,14 @@ def _commit_day(args) -> int:
     except (OSError, json.JSONDecodeError, ValidationError) as e:
         print(f"invalid day file: {e}", file=sys.stderr)
         return 1
+    for topic in day.topics:
+        if topic.image_url is None:
+            url = fetch_og_image(str(topic.source_url))
+            if url:
+                try:
+                    topic.image_url = HttpUrl(url)
+                except ValueError:
+                    pass
     commit_day(day, Path(args.data))
     print(f"committed {day.date}")
     return 0

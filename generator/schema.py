@@ -16,6 +16,11 @@ class TermCard(BaseModel):
     field: str
 
 
+class FlowStep(BaseModel):
+    label: str = Field(min_length=1)  # short, ~20 chars
+    detail: str  # ~40 chars
+
+
 class Topic(BaseModel):
     id: str
     title: str
@@ -28,6 +33,9 @@ class Topic(BaseModel):
     hook: str
     source_url: HttpUrl
     source_title: str
+    flow: list[FlowStep] = Field(default_factory=list, max_length=6)  # 仕組みの流れ図 (3-5 steps)
+    video_query: str | None = None  # YouTube search keywords
+    image_url: HttpUrl | None = None  # og:image of the source, filled by commit-day
 
 
 class DayFile(BaseModel):

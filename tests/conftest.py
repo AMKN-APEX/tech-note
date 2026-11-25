@@ -33,3 +33,10 @@ def make_day():
         )
 
     return _make
+
+
+@pytest.fixture(autouse=True)
+def _no_network_og_image(monkeypatch):
+    import generator.__main__ as cli
+
+    monkeypatch.setattr(cli, "fetch_og_image", lambda url: None)

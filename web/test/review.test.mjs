@@ -83,3 +83,10 @@ test("importState rejects garbage", () => {
   assert.throws(() => importState("nope"));
   assert.throws(() => importState('{"version":1}'));
 });
+
+import { videoSearchUrl } from "../review.js";
+test("videoSearchUrl uses video_query, falls back to title, and encodes", () => {
+  assert.equal(videoSearchUrl({ title: "t", video_query: "ダイ ボンディング" }),
+    "https://www.youtube.com/results?search_query=%E3%83%80%E3%82%A4%20%E3%83%9C%E3%83%B3%E3%83%87%E3%82%A3%E3%83%B3%E3%82%B0");
+  assert.equal(videoSearchUrl({ title: "a&b" }), "https://www.youtube.com/results?search_query=a%26b");
+});

@@ -43,3 +43,14 @@ def test_fetch_writes_candidates(tmp_path, monkeypatch):
     result = json.loads(out.read_text(encoding="utf-8"))
     assert len(result["candidates"]) == 3
     assert result["failed"] == ["bad"]
+
+
+def test_commit_day_fills_image_url(tmp_path, make_day, monkeypatch):
+    import generator.__main__ as cli
+
+    monkeypatch.setattr(cli, "fetch_og_image", lambda url: "https://img.example.com/a.jpg")
+    src = tmp_path / "day.json"
+    src.write_text(json.dumps(make_day(), ensure_ascii=False), encoding="utf-8")
+    assert main(["commit-day", str(src), "--data", str(tmp_path / "d")]) == 0
+    written = json.loads((tmp_path / "d" / "days" / "2026-11-25.json").read_text(encoding="utf-8"))
+    assert written["topics"][0]["image_url"] == "https://img.example.com/a.jpg"
