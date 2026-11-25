@@ -6,7 +6,10 @@ requires-python = ">=3.12"
 dependencies = ["feedparser>=6", "pydantic>=2"]
 
 [dependency-groups]
-dev = ["pytest>=8"]
+dev = [
+    "nodejs-wheel-binaries>=24.19.0",
+    "pytest>=8",
+]
 
 [build-system]
 requires = ["hatchling"]
